@@ -1,4 +1,4 @@
-# 🧹 Limpiador de PDFs de Wuolah
+# 🧹 Limpiador de PDFs de Wuolah en Local
 
 Una herramienta interactiva local para limpiar de manera quirúrgica anuncios, banners, marcas de agua y páginas promocionales de documentos PDF descargados de Wuolah, devolviendo un archivo limpio, optimizado y con el formato de página corregido.
 
