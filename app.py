@@ -11,7 +11,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['SECRET_KEY'] = 'wuolah-cleaner-secret'
 
 # Workspace base path (defaults to project path)
-WORKSPACE_PATH = "/home/anlaim/Documentos/Proyectos/Limpiador_Wuolah"
+WORKSPACE_PATH = "/"
 CLEANED_DIR_NAME = "Limpiados"
 CLEANED_PATH = os.path.join(WORKSPACE_PATH, CLEANED_DIR_NAME)
 
