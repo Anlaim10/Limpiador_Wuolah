@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wuolah Cleaner Pro - Limpieza en Lote</title>
+    
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Vanilla CSS Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Deep Ambient Background Effects -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="app-container">
+        <!-- HEADER BAR -->
+        <header class="app-header">
+            <div class="logo-wrapper">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Wuolah<span>Cleaner</span>Pro</h1>
+                    <p class="tagline">Surgical Ad & Watermark Removal Engine</p>
+                </div>
+            </div>
+            <div class="server-status">
+                <span class="status-indicator online"></span>
+                <span class="status-label">Servidor Local Conectado</span>
+            </div>
+        </header>
+
+        <!-- DASHBOARD GRID -->
+        <main class="app-grid">
+            
+            <!-- LEFT SECTION: FILE MANAGEMENT -->
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h2><i class="fa-solid fa-folder-open"></i> Gestión de Archivos</h2>
+                        <p class="active-path-label" id="active-folder-display">Cargando carpeta activa...</p>
+                    </div>
+                    <span class="badge" id="local-files-count">0 archivos</span>
+                </div>
+                
+                <!-- DRAG AND DROP AREA -->
+                <div class="drag-drop-zone" id="drop-zone">
+                    <input type="file" id="file-input" multiple accept=".pdf" style="display: none;">
+                    <div class="drag-drop-content">
+                        <div class="upload-icon">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h3>Arrastra tus PDFs aquí</h3>
+                        <p>Soporte para carpetas y selección múltiple en lote</p>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
+                            <i class="fa-solid fa-file-pdf"></i> Explorar Archivos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OPTIONS BAR -->
+                <div class="options-bar">
+                    <label class="option-toggle" for="overwrite-toggle" style="cursor: pointer; display: flex; width: 100%;">
+                        <span class="switch">
+                            <input type="checkbox" id="overwrite-toggle">
+                            <span class="slider round"></span>
+                        </span>
+                        <span class="toggle-label">
+                            <strong>Sobrescribir originales</strong>
+                            <p>Reemplaza los archivos sin crear copia en subcarpeta</p>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- LOCAL FILES LIST -->
+                <div class="file-list-container">
+                    <div class="list-actions">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="select-all-checkbox">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Seleccionar Todos</span>
+                        </label>
+                        
+                        <button id="btn-refresh" class="btn btn-icon-only" title="Actualizar lista">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="file-list" id="files-list">
+                        <!-- Dynamic content filled by JS -->
+                        <div class="empty-list-state">
+                            <i class="fa-solid fa-face-smile-wink"></i>
+                            <p>No se encontraron PDFs en el directorio de trabajo.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAIN CONTROLS FOOTER -->
+                <div class="panel-footer">
+                    <button class="btn btn-primary" id="btn-clean-selected" disabled>
+                        <i class="fa-solid fa-bolt"></i> Limpiar Seleccionados
+                    </button>
+                    <div class="footer-actions-group">
+                        <button class="btn btn-secondary" id="btn-change-folder" title="Cambiar carpeta de PDFs">
+                            <i class="fa-solid fa-folder-open"></i> Seleccionar Carpeta
+                        </button>
+                        <button class="btn btn-secondary btn-icon-only" id="btn-open-folder" title="Abrir carpeta activa en explorador">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT SECTION: STATS & LOGS -->
+            <section class="right-column">
+                
+                <!-- STATISTICS PANEL -->
+                <div class="panel stats-panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-chart-simple"></i> Estadísticas Globales</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <!-- Stat Card 1 -->
+                        <div class="stats-card">
+                            <div class="card-icon blue"><i class="fa-solid fa-file-shield"></i></div>
+                            <div class="card-info">
+                                <span class="card-value" id="stat-files">0</span>
+                                <span class="card-label">PDFs Procesados</span>
+                            </div>
+                        </div>
+                        <!-- Stat Card 2 -->
+                        <div class="stats-card">
+                            <div class="card-icon red"><i class="fa-solid fa-trash-can"></i></div>
+                            <div class="card-info">
+                                <span class="card-value" id="stat-pages">0</span>
+                                <span class="card-label">Páginas de Anuncios</span>
+                            </div>
+                        </div>
+                        <!-- Stat Card 3 -->
+                        <div class="stats-card">
+                            <div class="card-icon yellow"><i class="fa-solid fa-scissors"></i></div>
+                            <div class="card-info">
+                                <span class="card-value" id="stat-watermarks">0</span>
+                                <span class="card-label">Bordes & Marcas</span>
+                            </div>
+                        </div>
+                        <!-- Stat Card 4 -->
+                        <div class="stats-card">
+                            <div class="card-icon green"><i class="fa-solid fa-circle-down"></i></div>
+                            <div class="card-info">
+                                <span class="card-value" id="stat-size">0.00</span>
+                                <span class="card-label">MB Recuperados</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TERMINAL LOG PANEL -->
+                <div class="panel console-panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-terminal"></i> Consola Quirúrgica en Tiempo Real</h2>
+                        <div class="console-controls">
+                            <label class="autoscroll-toggle">
+                                <input type="checkbox" id="autoscroll-checkbox" checked>
+                                <span>Auto-scroll</span>
+                            </label>
+                            <button class="btn-clear-console" id="btn-clear-console" title="Limpiar Consola">
+                                <i class="fa-solid fa-trash-arrow-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="console-body" id="console-output">
+                        <div class="console-line system">[SISTEMA] Listo para procesar documentos. Arrastra archivos o selecciona de la lista superior.</div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Vanilla Javascript Logic -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
