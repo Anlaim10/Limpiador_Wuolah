@@ -1,1 +1,22 @@
-/.venv
+# Entornos virtuales
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache y compilados
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Archivos temporales o de procesamiento
+temp_*
+upload_temp_*
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

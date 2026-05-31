@@ -31,11 +31,18 @@ Una herramienta interactiva local para limpiar de manera quirúrgica anuncios, b
 
 Para ejecutar este proyecto, necesitarás tener instalado lo siguiente en tu máquina local:
 
-1.  **Python 3.8 o superior**
-2.  **Zenity** (opcional, necesario en Linux para usar el selector gráfico de carpetas desde la interfaz web):
-    ```bash
-    sudo apt install zenity
-    ```
+1. **Python 3.8 o superior**
+2. **Bibliotecas gráficas de selección de carpetas** (la aplicación detectará tu sistema y usará la mejor opción):
+   - 🪟 **Windows**: No requiere nada adicional (utiliza diálogos nativos de PowerShell).
+   - 🍏 **macOS**: No requiere nada adicional (utiliza diálogos nativos de AppleScript).
+   - 🐧 **Linux**: Utiliza `zenity` de forma predeterminada. Puedes instalarlo con:
+     ```bash
+     sudo apt install zenity
+     ```
+   - 🔌 **Alternativa General (Fallback)**: Si fallan los métodos nativos, se utilizará la biblioteca estándar `tkinter`. En algunos sistemas Linux sin GUI de python puede ser necesario instalarla:
+     ```bash
+     sudo apt install python3-tk
+     ```
 
 ---
 
@@ -47,19 +54,35 @@ git clone https://github.com/tu-usuario/Limpiador_Wuolah.git
 cd Limpiador_Wuolah
 ```
 
-### 2. Crear y activar un entorno virtual (Recomendado)
+### 2. Configurar el Entorno e Instalar Dependencias
+
+Selecciona las instrucciones según tu sistema operativo:
+
+#### 🐧 Linux / 🍏 macOS
 ```bash
+# Crear entorno virtual
 python3 -m venv .venv
+
+# Activar entorno virtual
 source .venv/bin/activate
+
+# Instalar dependencias
+pip install -r requirements.txt
 ```
 
-### 3. Instalar las dependencias necesarias
-Instala Flask y PyMuPDF (la biblioteca de procesamiento PDF ultra-rápida):
-```bash
-pip install Flask PyMuPDF
+#### 🪟 Windows
+```powershell
+# Crear entorno virtual
+python -m venv .venv
+
+# Activar entorno virtual
+.venv\Scripts\activate
+
+# Instalar dependencias
+pip install -r requirements.txt
 ```
 
-### 4. Ejecutar la aplicación
+### 3. Ejecutar la aplicación
 Ejecuta el servidor local:
 ```bash
 python app.py

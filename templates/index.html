@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wuolah Cleaner Pro - Limpieza en Lote</title>
+    <title>Wuolah Cleaner Pro - Limpieza Quirúrgica</title>
     
     <!-- Premium Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +20,7 @@
     <!-- Deep Ambient Background Effects -->
     <div class="bg-glow bg-glow-1"></div>
     <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
 
     <div class="app-container">
         <!-- HEADER BAR -->
@@ -35,102 +36,129 @@
             </div>
             <div class="server-status">
                 <span class="status-indicator online"></span>
-                <span class="status-label">Servidor Local Conectado</span>
+                <span class="status-label">Servidor Conectado</span>
             </div>
         </header>
+
+        <!-- NEW WORKSPACE CONTROL BANNER (HORIZONTAL CARD) -->
+        <div class="panel workspace-banner">
+            <div class="workspace-info">
+                <div class="workspace-icon">
+                    <i class="fa-solid fa-folder-tree"></i>
+                </div>
+                <div class="workspace-details">
+                    <span class="workspace-label">Directorio Activo de Trabajo</span>
+                    <h3 id="active-folder-display" class="workspace-path">Cargando carpeta activa...</h3>
+                </div>
+            </div>
+            <div class="workspace-actions">
+                <button class="btn btn-secondary" id="btn-change-folder">
+                    <i class="fa-solid fa-folder-open"></i> Seleccionar Carpeta
+                </button>
+                <button class="btn btn-secondary btn-icon-only" id="btn-open-folder" title="Abrir carpeta activa en el sistema">
+                    <i class="fa-solid fa-up-right-from-square"></i>
+                </button>
+            </div>
+        </div>
 
         <!-- DASHBOARD GRID -->
         <main class="app-grid">
             
-            <!-- LEFT SECTION: FILE MANAGEMENT -->
-                <div class="panel-header">
-                    <div class="panel-title-group">
-                        <h2><i class="fa-solid fa-folder-open"></i> Gestión de Archivos</h2>
-                        <p class="active-path-label" id="active-folder-display">Cargando carpeta activa...</p>
-                    </div>
-                    <span class="badge" id="local-files-count">0 archivos</span>
-                </div>
+            <!-- LEFT COLUMN: IMPORT & WORKSPACE MANAGER -->
+            <section class="left-column">
                 
-                <!-- DRAG AND DROP AREA -->
-                <div class="drag-drop-zone" id="drop-zone">
-                    <input type="file" id="file-input" multiple accept=".pdf" style="display: none;">
-                    <div class="drag-drop-content">
-                        <div class="upload-icon">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                        </div>
-                        <h3>Arrastra tus PDFs aquí</h3>
-                        <p>Soporte para carpetas y selección múltiple en lote</p>
-                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
-                            <i class="fa-solid fa-file-pdf"></i> Explorar Archivos
-                        </button>
-                    </div>
-                </div>
-
-                <!-- OPTIONS BAR -->
-                <div class="options-bar">
-                    <label class="option-toggle" for="overwrite-toggle" style="cursor: pointer; display: flex; width: 100%;">
-                        <span class="switch">
-                            <input type="checkbox" id="overwrite-toggle">
-                            <span class="slider round"></span>
-                        </span>
-                        <span class="toggle-label">
-                            <strong>Sobrescribir originales</strong>
-                            <p>Reemplaza los archivos sin crear copia en subcarpeta</p>
-                        </span>
-                    </label>
-                </div>
-
-                <!-- LOCAL FILES LIST -->
-                <div class="file-list-container">
-                    <div class="list-actions">
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="select-all-checkbox">
-                            <span class="checkmark"></span>
-                            <span class="label-text">Seleccionar Todos</span>
-                        </label>
-                        
-                        <button id="btn-refresh" class="btn btn-icon-only" title="Actualizar lista">
-                            <i class="fa-solid fa-rotate"></i>
-                        </button>
+                <!-- CARD 1: IMPORT & OPTIONS -->
+                <div class="panel import-panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-cloud-arrow-up"></i> Arrastrar y Soltar</h2>
+                        <span class="badge">Drag & Drop</span>
                     </div>
                     
-                    <div class="file-list" id="files-list">
-                        <!-- Dynamic content filled by JS -->
-                        <div class="empty-list-state">
-                            <i class="fa-solid fa-face-smile-wink"></i>
-                            <p>No se encontraron PDFs en el directorio de trabajo.</p>
+                    <!-- DRAG AND DROP AREA -->
+                    <div class="drag-drop-zone" id="drop-zone">
+                        <input type="file" id="file-input" multiple accept=".pdf" style="display: none;">
+                        <div class="drag-drop-content">
+                            <div class="upload-icon">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </div>
+                            <h3>Sube tus PDFs directamente</h3>
+                            <p>Arrastra archivos o haz clic para explorar en tu ordenador</p>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
+                                <i class="fa-solid fa-magnifying-glass"></i> Explorar Archivos
+                            </button>
                         </div>
+                    </div>
+
+                    <!-- OPTIONS BAR -->
+                    <div class="options-bar">
+                        <label class="option-toggle" for="overwrite-toggle">
+                            <span class="switch">
+                                <input type="checkbox" id="overwrite-toggle">
+                                <span class="slider round"></span>
+                            </span>
+                            <span class="toggle-label">
+                                <strong>Sobrescribir archivos originales</strong>
+                                <p>Reemplaza el PDF original (si no está activo, se creará una copia limpia en la carpeta 'Limpiados')</p>
+                            </span>
+                        </label>
                     </div>
                 </div>
 
-                <!-- MAIN CONTROLS FOOTER -->
-                <div class="panel-footer">
-                    <button class="btn btn-primary" id="btn-clean-selected" disabled>
-                        <i class="fa-solid fa-bolt"></i> Limpiar Seleccionados
-                    </button>
-                    <div class="footer-actions-group">
-                        <button class="btn btn-secondary" id="btn-change-folder" title="Cambiar carpeta de PDFs">
-                            <i class="fa-solid fa-folder-open"></i> Seleccionar Carpeta
-                        </button>
-                        <button class="btn btn-secondary btn-icon-only" id="btn-open-folder" title="Abrir carpeta activa en explorador">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                <!-- CARD 2: LOCAL PDF MANAGER -->
+                <div class="panel manager-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <h2><i class="fa-solid fa-list-check"></i> Archivos en Directorio</h2>
+                            <p class="panel-subtitle">Selecciona los PDFs que deseas limpiar quirúrgicamente</p>
+                        </div>
+                        <span class="badge" id="local-files-count">0 archivos</span>
+                    </div>
+
+                    <!-- LOCAL FILES LIST CONTAINER -->
+                    <div class="file-list-container">
+                        <div class="list-actions">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="select-all-checkbox">
+                                <span class="checkmark"></span>
+                                <span class="label-text">Seleccionar Todos</span>
+                            </label>
+                            
+                            <button id="btn-refresh" class="btn btn-icon-only" title="Actualizar lista de archivos">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="file-list" id="files-list">
+                            <!-- Dynamic content filled by JS -->
+                            <div class="empty-list-state">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <p>No se encontraron PDFs en el directorio de trabajo.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MAIN CONTROLS FOOTER -->
+                    <div class="panel-footer">
+                        <button class="btn btn-primary" id="btn-clean-selected" disabled>
+                            <i class="fa-solid fa-bolt-lightning"></i> Limpiar Seleccionados
                         </button>
                     </div>
                 </div>
             </section>
 
-            <!-- RIGHT SECTION: STATS & LOGS -->
+            <!-- RIGHT COLUMN: STATS & LOGS -->
             <section class="right-column">
                 
                 <!-- STATISTICS PANEL -->
                 <div class="panel stats-panel">
                     <div class="panel-header">
-                        <h2><i class="fa-solid fa-chart-simple"></i> Estadísticas Globales</h2>
+                        <h2><i class="fa-solid fa-chart-line"></i> Estadísticas de Limpieza</h2>
+                        <span class="badge green">Servidor Activo</span>
                     </div>
                     <div class="stats-grid">
                         <!-- Stat Card 1 -->
                         <div class="stats-card">
-                            <div class="card-icon blue"><i class="fa-solid fa-file-shield"></i></div>
+                            <div class="card-icon blue"><i class="fa-solid fa-file-pdf"></i></div>
                             <div class="card-info">
                                 <span class="card-value" id="stat-files">0</span>
                                 <span class="card-label">PDFs Procesados</span>
@@ -138,15 +166,15 @@
                         </div>
                         <!-- Stat Card 2 -->
                         <div class="stats-card">
-                            <div class="card-icon red"><i class="fa-solid fa-trash-can"></i></div>
+                            <div class="card-icon red"><i class="fa-solid fa-rectangle-ad"></i></div>
                             <div class="card-info">
                                 <span class="card-value" id="stat-pages">0</span>
-                                <span class="card-label">Páginas de Anuncios</span>
+                                <span class="card-label">Anuncios Eliminados</span>
                             </div>
                         </div>
                         <!-- Stat Card 3 -->
                         <div class="stats-card">
-                            <div class="card-icon yellow"><i class="fa-solid fa-scissors"></i></div>
+                            <div class="card-icon yellow"><i class="fa-solid fa-crop"></i></div>
                             <div class="card-info">
                                 <span class="card-value" id="stat-watermarks">0</span>
                                 <span class="card-label">Bordes & Marcas</span>
@@ -154,10 +182,10 @@
                         </div>
                         <!-- Stat Card 4 -->
                         <div class="stats-card">
-                            <div class="card-icon green"><i class="fa-solid fa-circle-down"></i></div>
+                            <div class="card-icon green"><i class="fa-solid fa-database"></i></div>
                             <div class="card-info">
                                 <span class="card-value" id="stat-size">0.00</span>
-                                <span class="card-label">MB Recuperados</span>
+                                <span class="card-label">MB Ahorrados</span>
                             </div>
                         </div>
                     </div>
@@ -166,14 +194,14 @@
                 <!-- TERMINAL LOG PANEL -->
                 <div class="panel console-panel">
                     <div class="panel-header">
-                        <h2><i class="fa-solid fa-terminal"></i> Consola Quirúrgica en Tiempo Real</h2>
+                        <h2><i class="fa-solid fa-terminal"></i> Consola en Tiempo Real</h2>
                         <div class="console-controls">
                             <label class="autoscroll-toggle">
                                 <input type="checkbox" id="autoscroll-checkbox" checked>
-                                <span>Auto-scroll</span>
+                                <span class="toggle-text">Auto-scroll</span>
                             </label>
                             <button class="btn-clear-console" id="btn-clear-console" title="Limpiar Consola">
-                                <i class="fa-solid fa-trash-arrow-up"></i>
+                                <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
                     </div>

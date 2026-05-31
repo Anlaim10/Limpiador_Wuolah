@@ -8,10 +8,10 @@ from flask import Flask, render_template, jsonify, request, Response
 from cleaner import clean_pdf_file
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-app.config['SECRET_KEY'] = 'wuolah-cleaner-secret'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24))
 
-# Workspace base path (defaults to project path)
-WORKSPACE_PATH = "/"
+# Workspace base path (defaults to current working directory)
+WORKSPACE_PATH = os.path.abspath(os.environ.get('WORKSPACE_PATH', os.getcwd()))
 CLEANED_DIR_NAME = "Limpiados"
 CLEANED_PATH = os.path.join(WORKSPACE_PATH, CLEANED_DIR_NAME)
 
@@ -72,40 +72,143 @@ def get_local_files():
         "active_workspace": ACTIVE_WORKSPACE_PATH
     })
 
+def select_directory_native(initial_dir):
+    """
+    Selects a directory using a native GUI dialog in a cross-platform manner.
+    Supports Windows (PowerShell dialog), macOS (osascript dialog), and Linux (Zenity/Kdialog).
+    Falls back to Tkinter dialog if native OS dialogs fail, and finally to a console prompt/default path.
+    """
+    # 1. Try native platform specific methods
+    if sys.platform.startswith('linux'):
+        # Try Zenity first (standard GTK)
+        try:
+            result = subprocess.run(
+                ["zenity", "--file-selection", "--directory", "--title=Seleccionar Carpeta con PDFs de Wuolah", f"--filename={initial_dir}/"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False
+            )
+            if result.returncode == 0:
+                path = result.stdout.strip()
+                if path and os.path.isdir(path):
+                    return path
+            elif result.returncode == 1:
+                return None  # Cancelled by user
+        except Exception:
+            pass
+
+        # Try kdialog (KDE fallback)
+        try:
+            result = subprocess.run(
+                ["kdialog", "--getexistingdirectory", initial_dir, "--title", "Seleccionar Carpeta con PDFs de Wuolah"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False
+            )
+            if result.returncode == 0:
+                path = result.stdout.strip()
+                if path and os.path.isdir(path):
+                    return path
+        except Exception:
+            pass
+
+    elif sys.platform == 'win32':
+        # Try PowerShell FolderBrowserDialog
+        try:
+            # We escape the initial_dir appropriately for PowerShell
+            escaped_dir = initial_dir.replace('\\', '\\\\')
+            ps_script = (
+                f"Add-Type -AssemblyName System.Windows.Forms; "
+                f"$f = New-Object System.Windows.Forms.FolderBrowserDialog; "
+                f"$f.Description = 'Seleccionar Carpeta con PDFs de Wuolah'; "
+                f"$f.SelectedPath = '{escaped_dir}'; "
+                f"if ($f.ShowDialog() -eq 'OK') {{ $f.SelectedPath }}"
+            )
+            result = subprocess.run(
+                ["powershell", "-NoProfile", "-Command", ps_script],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False
+            )
+            if result.returncode == 0:
+                path = result.stdout.strip()
+                if path and os.path.isdir(path):
+                    return path
+        except Exception:
+            pass
+
+    elif sys.platform == 'darwin':
+        # Try macOS AppleScript choose folder dialog
+        try:
+            as_script = (
+                f'tell application "System Events" to activate\n'
+                f'POSIX path of (choose folder with prompt "Seleccionar Carpeta con PDFs de Wuolah" '
+                f'default location "{initial_dir}")'
+            )
+            result = subprocess.run(
+                ["osascript", "-e", as_script],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False
+            )
+            if result.returncode == 0:
+                path = result.stdout.strip()
+                if path and os.path.isdir(path):
+                    return path
+        except Exception:
+            pass
+
+    # 2. Try Tkinter fallback (cross-platform GUI dialog)
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+        # Tkinter requires a main window, which we withdraw/hide
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes('-topmost', True)  # Keep it on top
+        path = filedialog.askdirectory(
+            title="Seleccionar Carpeta con PDFs de Wuolah",
+            initialdir=initial_dir
+        )
+        root.destroy()
+        if path and os.path.isdir(path):
+            return path
+    except Exception:
+        pass
+
+    return None
+
+
 @app.route('/api/change-folder', methods=['POST'])
 def change_folder():
-    """Opens a native graphical folder selection dialog using Zenity on Linux."""
+    """Opens a native graphical folder selection dialog depending on the operating system."""
     global ACTIVE_WORKSPACE_PATH, ACTIVE_CLEANED_PATH
     
     try:
-        push_log("[INFO] Abriendo selector de carpeta nativo en tu escritorio Linux...")
-        # Run Zenity directory selection dialog
-        result = subprocess.run(
-            ["zenity", "--file-selection", "--directory", "--title=Seleccionar Carpeta con PDFs de Wuolah", f"--filename={ACTIVE_WORKSPACE_PATH}/"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        push_log("[INFO] Abriendo selector de carpeta nativo en tu sistema operativo...")
+        selected_path = select_directory_native(ACTIVE_WORKSPACE_PATH)
         
-        if result.returncode == 0:
-            selected_path = result.stdout.strip()
-            if selected_path and os.path.isdir(selected_path):
-                ACTIVE_WORKSPACE_PATH = selected_path
-                ACTIVE_CLEANED_PATH = os.path.join(ACTIVE_WORKSPACE_PATH, CLEANED_DIR_NAME)
-                os.makedirs(ACTIVE_CLEANED_PATH, exist_ok=True)
-                
-                push_log(f"[SUCCESS] Carpeta activa de limpieza cambiada a: {ACTIVE_WORKSPACE_PATH}")
-                return jsonify({
-                    "success": True, 
-                    "active_workspace": ACTIVE_WORKSPACE_PATH,
-                    "active_cleaned": ACTIVE_CLEANED_PATH
-                })
-                
-        push_log("[INFO] Selección de carpeta cancelada por el usuario.")
+        if selected_path:
+            ACTIVE_WORKSPACE_PATH = selected_path
+            ACTIVE_CLEANED_PATH = os.path.join(ACTIVE_WORKSPACE_PATH, CLEANED_DIR_NAME)
+            os.makedirs(ACTIVE_CLEANED_PATH, exist_ok=True)
+            
+            push_log(f"[SUCCESS] Carpeta activa de limpieza cambiada a: {ACTIVE_WORKSPACE_PATH}")
+            return jsonify({
+                "success": True, 
+                "active_workspace": ACTIVE_WORKSPACE_PATH,
+                "active_cleaned": ACTIVE_CLEANED_PATH
+            })
+            
+        push_log("[INFO] Selección de carpeta cancelada o no disponible.")
         return jsonify({"success": False, "message": "Selección cancelada"})
         
     except Exception as e:
-        push_log(f"[ERROR] No se pudo abrir el selector Zenity: {str(e)}")
+        push_log(f"[ERROR] Error al cambiar la carpeta: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/clean-local', methods=['POST'])
@@ -267,9 +370,15 @@ def open_folder():
         os.makedirs(target_path, exist_ok=True)
         
     try:
-        # Popen is non-blocking and safe from non-zero exit code crashes
-        subprocess.Popen(["xdg-open", target_path])
-        return jsonify({"success": True})
+        if sys.platform == 'win32':
+            os.startfile(target_path)
+            return jsonify({"success": True})
+        elif sys.platform == 'darwin':
+            subprocess.Popen(["open", target_path])
+            return jsonify({"success": True})
+        else:
+            subprocess.Popen(["xdg-open", target_path])
+            return jsonify({"success": True})
     except Exception as e:
         # Fallback to webbrowser module which is extremely reliable for files URI
         try:
